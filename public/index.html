@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayFab Vercel Bypass</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-card.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .result-card.failed {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .result-card.banned {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-verified {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-banned {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .status-failed {
+            background: #ef4444;
+            color: white;
+        }
+
+        .result-data {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 PlayFab Vercel Bypass</h1>
+        <p class="subtitle">Create PlayFab accounts using legitimate cloud infrastructure</p>
+
+        <div class="input-group">
+            <label for="titleId">PlayFab Title ID</label>
+            <input type="text" id="titleId" placeholder="Enter your PlayFab Title ID" required>
+        </div>
+
+        <div class="input-group">
+            <label for="attempts">Number of Attempts</label>
+            <select id="attempts">
+                <option value="1">1 attempt</option>
+                <option value="5">5 attempts</option>
+                <option value="10" selected>10 attempts</option>
+                <option value="20">20 attempts</option>
+                <option value="50">50 attempts</option>
+                <option value="100">100 attempts</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>
+                <input type="checkbox" id="batchMode"> Batch Mode (return all results, not just first success)
+            </label>
+        </div>
+
+        <button id="createBtn" onclick="createAccounts()">Create Accounts</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Creating accounts and testing VPN bypass...</p>
+            <p style="font-size: 12px; opacity: 0.7; margin-top: 10px;">This may take a few seconds per attempt</p>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        async function createAccounts() {
+            const titleId = document.getElementById('titleId').value.trim();
+            const attempts = document.getElementById('attempts').value;
+            const batchMode = document.getElementById('batchMode').checked;
+
+            if (!titleId) {
+                alert('Please enter a PlayFab Title ID');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('createBtn').disabled = true;
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('results').classList.remove('active');
+
+            try {
+                const params = new URLSearchParams({
+                    titleId: titleId,
+                    attempts: attempts,
+                    batch: batchMode
+                });
+
+                const response = await fetch(`/api/create-account?${params}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                document.getElementById('createBtn').disabled = false;
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            // Summary
+            const summary = document.createElement('div');
+            summary.className = 'summary';
+            summary.innerHTML = `
+                <div class="stat">
+                    <div class="stat-value">${data.summary.total}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${data.summary.verified}</div>
+                    <div class="stat-label">Verified ✓</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${data.summary.banned}</div>
+                    <div class="stat-label">Banned</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${data.summary.failed}</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            `;
+            resultsDiv.appendChild(summary);
+
+            // Individual results
+            data.accounts.forEach((account, index) => {
+                const card = document.createElement('div');
+                card.className = `result-card ${account.status}`;
+
+                let statusBadge = '';
+                if (account.status === 'verified') {
+                    statusBadge = '<span class="status-badge status-verified">✓ VERIFIED</span>';
+                } else if (account.status === 'banned') {
+                    statusBadge = '<span class="status-badge status-banned">⚠ BANNED</span>';
+                } else if (account.status === 'failed') {
+                    statusBadge = '<span class="status-badge status-failed">✗ FAILED</span>';
+                }
+
+                let content = `
+                    <div class="result-title">
+                        Account #${index + 1}
+                        ${statusBadge}
+                    </div>
+                    <div class="result-data">
+                `;
+
+                if (account.status === 'verified') {
+                    content += `
+                        <strong>Custom ID:</strong> ${account.customId} <button class="copy-btn" onclick="copyToClipboard('${account.customId}')">Copy</button><br>
+                        <strong>PlayFab ID:</strong> ${account.playFabId}<br>
+                        <strong>Session Ticket:</strong> ${account.sessionTicket.substring(0, 40)}...<br>
+                        <strong>Created:</strong> ${new Date(account.createdAt).toLocaleString()}
+                    `;
+                } else if (account.status === 'banned') {
+                    content += `
+                        <strong>Custom ID:</strong> ${account.customId}<br>
+                        <strong>Status:</strong> Account was banned by VPN check
+                    `;
+                } else if (account.status === 'failed') {
+                    content += `
+                        <strong>Custom ID:</strong> ${account.customId}<br>
+                        <strong>Error:</strong> ${account.error}
+                    `;
+                }
+
+                content += '</div>';
+                card.innerHTML = content;
+                resultsDiv.appendChild(card);
+            });
+
+            resultsDiv.classList.add('active');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard: ' + text);
+            });
+        }
+    </script>
+</body>
+</html>
